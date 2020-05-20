@@ -1,0 +1,52 @@
+#!/bin/bash
+
+TTY_DEFAULT=$(tput sgr0)
+TTY_RED=$(tput setaf 1)
+TTY_CYAN=$(tput setaf 6)
+TTY_GREEN=$(tput setaf 2)
+TTY_BOLD=$(tput bold)
+
+(
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} ${TTY_BOLD}${TTY_RED}Please run this script as root${TTY_DEFAULT}"
+    echo "{SIGEXIT}"
+fi
+tmp_dir=$(mktemp -d)
+pushd $tmp_dir 2>&1 >/dev/null
+    echo -e "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} Downloading winetricks..."
+    wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+    if [ $? -ne 0 ]; then
+        echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} ${TTY_BOLD}${TTY_RED}Error downloading winetricks.${TTY_DEFAULT}"
+    echo "{SIGEXIT}"
+    fi
+    wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion
+    if [ $? -ne 0 ]; then
+        echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} ${TTY_BOLD}${TTY_RED}Error downloading winetricks.bash-completion.${TTY_DEFAULT}"
+    echo "{SIGEXIT}"
+    fi
+    echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} Applying patches..."
+    sed -i 's/http\:\/\/www\.business\.uwm\.edu\/gdrive\/Dietenberger\_E\/PowerPointViewer\.exe/https\:\/\/archive\.org\/download\/PowerPointViewer\_201801\/PowerPointViewer\.exe/g' /usr/bin/winetricks
+    if [ $? -ne 0 ]; then
+        echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} ${TTY_BOLD}}${TTY_RED}Error applying winetricks patches.${TTY_DEFAULT}"
+    echo "{SIGEXIT}"
+    fi
+    echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} Installing winetricks..."
+    chmod +x winetricks
+    [[ -f /usr/bin/winetricks ]] && rm -f /usr/bin/winetricks
+    [[ -f /usr/share/bash-completion/completions/winetricks ]] && rm -f /usr/share/bash-completion/completions/winetricks
+    mv -f winetricks /usr/bin
+    mv -f winetricks.bash-completion /usr/share/bash-completion/completions/winetricks
+    if [ $? -ne 0 ]; then
+        echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]${TTY_DEFAULT} ${TTY_BOLD}${TTY_RED}Error copying winetricks binary to destination directory.${TTY_DEFAULT}"
+    	echo "{SIGEXIT}"
+    fi
+    echo "${TTY_BOLD}${TTY_CYAN}[WINETRICKS-UPDATE]{$TTY_DEFAULT} ${TTY_BOLD}${TTY_GREEN}Winetricks updated/installed successfully!${TTY_DEFAULT}"
+popd 2>&1 >/dev/null
+rm -rf $tmp_dir
+) 2>&1 | ( while read -r line ; do
+    if [[ $line =~ .+?\[WINETRICKS\-UPDATE\].+? ]]; then
+        echo "$line"
+    elif [[ $line =~ .+?\{SIGEXIT\}.+? ]]; then
+        exit 1
+    fi
+done )
