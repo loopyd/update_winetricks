@@ -19,4 +19,4 @@ sudo update_winetricks
 
 ## Enjoy!
 
-Thank you!  Winetricks isn't my software, it can be found at (this repository)[https://github.com/Winetricks/winetricks]
+Thank you!  Winetricks isn't my software, it can be found at [this repository](https://github.com/Winetricks/winetricks)
