@@ -6,7 +6,7 @@ A script to update winetricks automatically.
 Via curl:
 
 ```
-bash <(curl -s https://github.com/loopyd/update_winetricks/raw/master/update_winetricks)
+bash <(curl -s https://raw.githubusercontent.com/loopyd/update_winetricks/master/update_winetricks)
 ```
 
 ## Usage
